@@ -78,11 +78,11 @@ Parameters:
     Default: 'false'
 
 Resources:
-  # ── IAM Role for App Runner ─────────────────────────────────────────────
+  # ── IAM Role for App Runner Instances (Runtime) ─────────────────────────
   AppRunnerInstanceRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: PulseNetAppRunnerRole
+      RoleName: PulseNetAppRunnerInstanceRole
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -105,20 +105,20 @@ Resources:
                   - bedrock:InvokeModel
                 Resource: '*'
 
-  # ── ECR Repositories ────────────────────────────────────────────────────
-  BackendECR:
-    Type: AWS::ECR::Repository
+  # ── IAM Role for App Runner to Pull ECR Images ──────────────────────────
+  AppRunnerAccessRole:
+    Type: AWS::IAM::Role
     Properties:
-      RepositoryName: pulsenet-backend
-      ImageScanningConfiguration:
-        ScanOnPush: true
-
-  FrontendECR:
-    Type: AWS::ECR::Repository
-    Properties:
-      RepositoryName: pulsenet-frontend
-      ImageScanningConfiguration:
-        ScanOnPush: true
+      RoleName: PulseNetAppRunnerAccessRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: build.apprunner.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSAppRunnerServicePolicyForECRAccess
 
   # ── App Runner: FastAPI Backend ─────────────────────────────────────────
   BackendService:
@@ -164,7 +164,7 @@ Resources:
                 Value: !Ref BedrockModelId
         AutoDeploymentsEnabled: false
         AuthenticationConfiguration:
-          AccessRoleArn: !GetAtt AppRunnerInstanceRole.Arn
+          AccessRoleArn: !GetAtt AppRunnerAccessRole.Arn
       InstanceConfiguration:
         Cpu: '1 vCPU'
         Memory: '2 GB'
@@ -194,7 +194,7 @@ Resources:
                 Value: !Sub 'https://${BackendService.ServiceUrl}'
         AutoDeploymentsEnabled: false
         AuthenticationConfiguration:
-          AccessRoleArn: !GetAtt AppRunnerInstanceRole.Arn
+          AccessRoleArn: !GetAtt AppRunnerAccessRole.Arn
       InstanceConfiguration:
         Cpu: '0.5 vCPU'
         Memory: '1 GB'
