@@ -54,6 +54,28 @@ echo "   ✅ Frontend pushed: $FRONTEND_IMAGE"
 echo ""
 echo "☁️  Deploying CloudFormation (SAM)…"
 
+# ── Check for stuck/failed stack and delete it so we can redeploy ────────────
+STACK_NAME="pulsenet-${ENV}"
+STACK_STATUS=$(aws cloudformation describe-stacks \
+  --stack-name "$STACK_NAME" \
+  --region "$AWS_REGION" \
+  --query "Stacks[0].StackStatus" \
+  --output text 2>/dev/null || echo "DOES_NOT_EXIST")
+
+echo "   Stack status: ${STACK_STATUS}"
+
+if [[ "$STACK_STATUS" == "ROLLBACK_COMPLETE" || \
+      "$STACK_STATUS" == "CREATE_FAILED" || \
+      "$STACK_STATUS" == "ROLLBACK_FAILED" || \
+      "$STACK_STATUS" == "UPDATE_ROLLBACK_FAILED" ]]; then
+  echo "   ⚠️  Stack is in unrecoverable state (${STACK_STATUS}). Deleting before redeploying…"
+  aws cloudformation delete-stack --stack-name "$STACK_NAME" --region "$AWS_REGION"
+  echo "   ⏳ Waiting for stack deletion to complete…"
+  aws cloudformation wait stack-delete-complete --stack-name "$STACK_NAME" --region "$AWS_REGION"
+  echo "   ✅ Old stack deleted. Proceeding with fresh deployment."
+fi
+
+
 # Retrieve DATABASE_URL and SECRET_KEY from AWS Secrets Manager (preferred)
 # Fallback: read from local .env (not recommended for production)
 DB_URL=${DATABASE_URL:-$(aws secretsmanager get-secret-value \
