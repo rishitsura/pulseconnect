@@ -201,8 +201,8 @@ Resources:
       HealthCheckConfiguration:
         Protocol: HTTP
         Path: /
-        Interval: 30
-        Timeout: 10
+        Interval: 10
+        Timeout: 5
 
   # ── CloudWatch Log Group ────────────────────────────────────────────────
   PulseNetLogGroup:
