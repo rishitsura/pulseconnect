@@ -1,0 +1,49 @@
+name: Deploy to AWS Production
+
+on:
+  push:
+    branches:
+      - prod
+
+env:
+  # The following will be injected into aws/deploy.sh via the environment
+  AWS_REGION: ${{ secrets.AWS_REGION || 'us-east-1' }}
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}
+  SECRET_KEY: ${{ secrets.SECRET_KEY }}
+  DEMO_MODE: ${{ secrets.DEMO_MODE || 'false' }}
+  COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
+  COGNITO_CLIENT_ID: ${{ secrets.COGNITO_CLIENT_ID }}
+  COGNITO_CLIENT_SECRET: ${{ secrets.COGNITO_CLIENT_SECRET }}
+  COGNITO_REGION: ${{ secrets.COGNITO_REGION || 'us-east-1' }}
+  SNS_TOPIC_ARN: ${{ secrets.SNS_TOPIC_ARN }}
+  SES_SENDER_EMAIL: ${{ secrets.SES_SENDER_EMAIL }}
+  TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+  TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+  TWILIO_WHATSAPP_FROM: ${{ secrets.TWILIO_WHATSAPP_FROM }}
+  BEDROCK_MODEL_ID: ${{ secrets.BEDROCK_MODEL_ID }}
+  SAGEMAKER_ENDPOINT_NAME: ${{ secrets.SAGEMAKER_ENDPOINT_NAME || 'pulsenet-xgboost-endpoint' }}
+
+jobs:
+  deploy:
+    name: Deploy to AWS App Runner
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
+
+      - name: Setup AWS SAM CLI
+        uses: aws-actions/setup-sam@v2
+
+      - name: Make deploy script executable
+        run: chmod +x ./aws/deploy.sh
+
+      - name: Execute Deployment Script
+        run: ./aws/deploy.sh prod

@@ -19,11 +19,18 @@ FRONTEND_IMAGE="${ECR_BASE}/pulsenet-frontend:${GIT_SHA}"
 echo "🚀 Deploying PulseNet [${ENV}] — commit ${GIT_SHA}"
 echo "   AWS Account: ${AWS_ACCOUNT_ID} | Region: ${AWS_REGION}"
 
-# ── Step 1: Login to ECR ─────────────────────────────────────────────────────
+# ── Step 1: Login & Ensure ECR Repositories Exist ────────────────────────────
 echo ""
 echo "🔐 Logging in to ECR…"
 aws ecr get-login-password --region "$AWS_REGION" | \
   docker login --username AWS --password-stdin "${ECR_BASE}"
+
+echo "📦 Ensuring ECR repositories exist…"
+aws ecr describe-repositories --repository-names pulsenet-backend --region "$AWS_REGION" >/dev/null 2>&1 || \
+  aws ecr create-repository --repository-name pulsenet-backend --region "$AWS_REGION" >/dev/null
+
+aws ecr describe-repositories --repository-names pulsenet-frontend --region "$AWS_REGION" >/dev/null 2>&1 || \
+  aws ecr create-repository --repository-name pulsenet-frontend --region "$AWS_REGION" >/dev/null
 
 # ── Step 2: Build + push backend ─────────────────────────────────────────────
 echo ""
@@ -65,6 +72,17 @@ sam deploy \
     SecretKey="${SECRET}" \
     BackendImageUri="${BACKEND_IMAGE}" \
     FrontendImageUri="${FRONTEND_IMAGE}" \
+    DemoMode="${DEMO_MODE:-false}" \
+    CognitoUserPoolId="${COGNITO_USER_POOL_ID:-}" \
+    CognitoClientId="${COGNITO_CLIENT_ID:-}" \
+    CognitoClientSecret="${COGNITO_CLIENT_SECRET:-}" \
+    CognitoRegion="${COGNITO_REGION:-us-east-1}" \
+    SnsTopicArn="${SNS_TOPIC_ARN:-}" \
+    SesSenderEmail="${SES_SENDER_EMAIL:-}" \
+    TwilioAccountSid="${TWILIO_ACCOUNT_SID:-}" \
+    TwilioAuthToken="${TWILIO_AUTH_TOKEN:-}" \
+    TwilioWhatsappFrom="${TWILIO_WHATSAPP_FROM:-}" \
+    BedrockModelId="${BEDROCK_MODEL_ID:-}" \
   --no-fail-on-empty-changeset
 
 echo ""

@@ -44,6 +44,39 @@ Parameters:
     Type: String
     Default: ''
 
+  CognitoUserPoolId:
+    Type: String
+    Default: ''
+  CognitoClientId:
+    Type: String
+    Default: ''
+  CognitoClientSecret:
+    Type: String
+    NoEcho: true
+    Default: ''
+  CognitoRegion:
+    Type: String
+    Default: 'us-east-1'
+  SesSenderEmail:
+    Type: String
+    Default: ''
+  TwilioAccountSid:
+    Type: String
+    Default: ''
+  TwilioAuthToken:
+    Type: String
+    NoEcho: true
+    Default: ''
+  TwilioWhatsappFrom:
+    Type: String
+    Default: ''
+  BedrockModelId:
+    Type: String
+    Default: 'anthropic.claude-haiku-4-5-20251001-v1:0'
+  DemoMode:
+    Type: String
+    Default: 'false'
+
 Resources:
   # ── IAM Role for App Runner ─────────────────────────────────────────────
   AppRunnerInstanceRole:
@@ -107,6 +140,28 @@ Resources:
                 Value: !Ref Environment
               - Name: SAGEMAKER_ENDPOINT_NAME
                 Value: !Ref SageMakerEndpoint
+              - Name: DEMO_MODE
+                Value: !Ref DemoMode
+              - Name: COGNITO_USER_POOL_ID
+                Value: !Ref CognitoUserPoolId
+              - Name: COGNITO_CLIENT_ID
+                Value: !Ref CognitoClientId
+              - Name: COGNITO_CLIENT_SECRET
+                Value: !Ref CognitoClientSecret
+              - Name: COGNITO_REGION
+                Value: !Ref CognitoRegion
+              - Name: SNS_TOPIC_ARN
+                Value: !Ref SnsTopicArn
+              - Name: SES_SENDER_EMAIL
+                Value: !Ref SesSenderEmail
+              - Name: TWILIO_ACCOUNT_SID
+                Value: !Ref TwilioAccountSid
+              - Name: TWILIO_AUTH_TOKEN
+                Value: !Ref TwilioAuthToken
+              - Name: TWILIO_WHATSAPP_FROM
+                Value: !Ref TwilioWhatsappFrom
+              - Name: BEDROCK_MODEL_ID
+                Value: !Ref BedrockModelId
         AutoDeploymentsEnabled: false
         AuthenticationConfiguration:
           AccessRoleArn: !GetAtt AppRunnerInstanceRole.Arn
