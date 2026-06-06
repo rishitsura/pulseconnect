@@ -86,6 +86,16 @@ SECRET=${SECRET_KEY:-$(aws secretsmanager get-secret-value \
 
 OVERRIDES="Environment=${ENV} DatabaseUrl=${DB_URL} SecretKey=${SECRET} BackendImageUri=${BACKEND_IMAGE} FrontendImageUri=${FRONTEND_IMAGE} DemoMode=${DEMO_MODE:-false}"
 
+# Compute ALLOWED_ORIGINS — include any existing frontend App Runner URL + localhost
+FRONTEND_URL=$(aws apprunner list-services \
+  --query "ServiceSummaryList[?ServiceName=='pulsenet-frontend'].ServiceUrl" \
+  --output text 2>/dev/null || echo '')
+ALLOWED_ORIGINS="http://localhost:5173,http://localhost:3000"
+if [ -n "$FRONTEND_URL" ]; then
+  ALLOWED_ORIGINS="${ALLOWED_ORIGINS},https://${FRONTEND_URL}"
+fi
+OVERRIDES="$OVERRIDES AllowedOrigins=${ALLOWED_ORIGINS}"
+
 [ -n "${COGNITO_USER_POOL_ID:-}" ] && OVERRIDES="$OVERRIDES CognitoUserPoolId=${COGNITO_USER_POOL_ID}"
 [ -n "${COGNITO_CLIENT_ID:-}" ] && OVERRIDES="$OVERRIDES CognitoClientId=${COGNITO_CLIENT_ID}"
 [ -n "${COGNITO_CLIENT_SECRET:-}" ] && OVERRIDES="$OVERRIDES CognitoClientSecret=${COGNITO_CLIENT_SECRET}"

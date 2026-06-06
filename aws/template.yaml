@@ -77,6 +77,10 @@ Parameters:
     Type: String
     Default: 'false'
 
+  AllowedOrigins:
+    Type: String
+    Default: 'http://localhost:5173,http://localhost:3000'
+
 Resources:
   # ── IAM Role for App Runner Instances (Runtime) ─────────────────────────
   AppRunnerInstanceRole:
@@ -162,6 +166,8 @@ Resources:
                 Value: !Ref TwilioWhatsappFrom
               - Name: BEDROCK_MODEL_ID
                 Value: !Ref BedrockModelId
+              - Name: ALLOWED_ORIGINS
+                Value: !Ref AllowedOrigins
         AutoDeploymentsEnabled: false
         AuthenticationConfiguration:
           AccessRoleArn: !GetAtt AppRunnerAccessRole.Arn
