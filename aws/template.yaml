@@ -188,7 +188,7 @@ Resources:
           ImageIdentifier: !Ref FrontendImageUri
           ImageRepositoryType: ECR
           ImageConfiguration:
-            Port: '80'
+            Port: '8080'
             RuntimeEnvironmentVariables:
               - Name: VITE_API_URL
                 Value: !Sub 'https://${BackendService.ServiceUrl}'
@@ -200,7 +200,7 @@ Resources:
         Memory: '1 GB'
       HealthCheckConfiguration:
         Protocol: HTTP
-        Path: /
+        Path: /health
         Interval: 10
         Timeout: 5
 
