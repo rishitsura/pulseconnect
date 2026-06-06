@@ -14,7 +14,7 @@ Parameters:
   Environment:
     Type: String
     Default: development
-    AllowedValues: [development, staging, production]
+    AllowedValues: [development, staging, production, dev, prod]
 
   # RDS connection — use Secrets Manager in production
   DatabaseUrl:
