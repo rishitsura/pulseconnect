@@ -61,28 +61,26 @@ DB_URL=${DATABASE_URL:-$(aws secretsmanager get-secret-value \
 SECRET=${SECRET_KEY:-$(aws secretsmanager get-secret-value \
   --secret-id pulsenet/secret_key --query SecretString --output text 2>/dev/null || echo 'change_me')}
 
+
+OVERRIDES="Environment=${ENV} DatabaseUrl=${DB_URL} SecretKey=${SECRET} BackendImageUri=${BACKEND_IMAGE} FrontendImageUri=${FRONTEND_IMAGE} DemoMode=${DEMO_MODE:-false}"
+
+[ -n "${COGNITO_USER_POOL_ID:-}" ] && OVERRIDES="$OVERRIDES CognitoUserPoolId=${COGNITO_USER_POOL_ID}"
+[ -n "${COGNITO_CLIENT_ID:-}" ] && OVERRIDES="$OVERRIDES CognitoClientId=${COGNITO_CLIENT_ID}"
+[ -n "${COGNITO_CLIENT_SECRET:-}" ] && OVERRIDES="$OVERRIDES CognitoClientSecret=${COGNITO_CLIENT_SECRET}"
+[ -n "${COGNITO_REGION:-}" ] && OVERRIDES="$OVERRIDES CognitoRegion=${COGNITO_REGION}"
+[ -n "${SNS_TOPIC_ARN:-}" ] && OVERRIDES="$OVERRIDES SnsTopicArn=${SNS_TOPIC_ARN}"
+[ -n "${SES_SENDER_EMAIL:-}" ] && OVERRIDES="$OVERRIDES SesSenderEmail=${SES_SENDER_EMAIL}"
+[ -n "${TWILIO_ACCOUNT_SID:-}" ] && OVERRIDES="$OVERRIDES TwilioAccountSid=${TWILIO_ACCOUNT_SID}"
+[ -n "${TWILIO_AUTH_TOKEN:-}" ] && OVERRIDES="$OVERRIDES TwilioAuthToken=${TWILIO_AUTH_TOKEN}"
+[ -n "${TWILIO_WHATSAPP_FROM:-}" ] && OVERRIDES="$OVERRIDES TwilioWhatsappFrom=${TWILIO_WHATSAPP_FROM}"
+[ -n "${BEDROCK_MODEL_ID:-}" ] && OVERRIDES="$OVERRIDES BedrockModelId=${BEDROCK_MODEL_ID}"
+
 sam deploy \
   --template-file aws/template.yaml \
   --stack-name "pulsenet-${ENV}" \
   --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
   --region "$AWS_REGION" \
-  --parameter-overrides \
-    Environment="${ENV}" \
-    DatabaseUrl="${DB_URL}" \
-    SecretKey="${SECRET}" \
-    BackendImageUri="${BACKEND_IMAGE}" \
-    FrontendImageUri="${FRONTEND_IMAGE}" \
-    DemoMode="${DEMO_MODE:-false}" \
-    CognitoUserPoolId="${COGNITO_USER_POOL_ID:-}" \
-    CognitoClientId="${COGNITO_CLIENT_ID:-}" \
-    CognitoClientSecret="${COGNITO_CLIENT_SECRET:-}" \
-    CognitoRegion="${COGNITO_REGION:-us-east-1}" \
-    SnsTopicArn="${SNS_TOPIC_ARN:-}" \
-    SesSenderEmail="${SES_SENDER_EMAIL:-}" \
-    TwilioAccountSid="${TWILIO_ACCOUNT_SID:-}" \
-    TwilioAuthToken="${TWILIO_AUTH_TOKEN:-}" \
-    TwilioWhatsappFrom="${TWILIO_WHATSAPP_FROM:-}" \
-    BedrockModelId="${BEDROCK_MODEL_ID:-}" \
+  --parameter-overrides $OVERRIDES \
   --no-fail-on-empty-changeset
 
 echo ""
