@@ -1,13 +1,65 @@
 # PulseNet 🩸
 
 > **AI FOR GOOD 2.0 Hackathon** — Blood Warriors Foundation  
-> AI-Enabled Care Coordination & Access for Thalassemia Patients
+> **Team:** The Brainiacs  
+> **AI-Enabled Care Coordination & Access for Thalassemia Patients**
+
+PulseNet is an intelligent care coordination platform designed to bridge the gap between Thalassemia patients and blood donors. By leveraging Machine Learning (XGBoost) and Generative AI (Amazon Bedrock), it optimizes donor mapping, reduces patient stress, and empowers care coordinators with predictive insights.
+
+**Three flows, one platform:**
+- 🩸 **Donor** — Pod assignment, transfusion history, availability confirmation, re-engagement nudges
+- 🏥 **Patient** — Transfusion calendar, pod health visibility, emergency request trigger
+- 🛡️ **Admin / Coordinator** — Full pod control centre, ML-ranked donor matching, emergency board, centre stress forecasting, cycle readiness heatmaps
 
 ---
 
-## Architecture
+## Real-World Dataset
 
-```
+Trained and seeded on **real Blood Warriors donor data** (1.6MB, 10,000+ donor records) — `Dataset.csv` in repo root. This is actual operational data from the Blood Warriors Foundation, covering blood group distribution, eligibility status, call-to-donation ratios, bridge assignments, and transfusion schedules across Hyderabad centres.
+
+---
+
+## 🚀 Live Demo & Deployment Links
+
+The application is fully deployed and live on AWS App Runner. 
+
+- **Frontend Application (Donor & Admin Dashboards):** `https://64xvp3psvb.us-east-1.awsapprunner.com`
+- **Backend API Docs (FastAPI Swagger):** `https://32twtm5enf.us-east-1.awsapprunner.com`
+
+### 🔑 Test Credentials for Judges
+
+We have pre-synced various user personas via AWS Cognito. Use the following credentials to explore the different dashboards:
+
+**Admin / Care Coordinator Dashboard:**
+*This persona has full access to AI insights, donor management, and WhatsApp/SNS notification triggers.*
+- **Email:** `admin@test.com`
+- **Password:** `Admin123!`
+
+**Donor Dashboard:**
+*These personas demonstrate real donor profiles synced directly from the RDS database.*
+- **Email:** `965f27@pulsenet.ai` *(Donor ID: 2706)*
+- **Email:** `107992@pulsenet.ai` *(Donor ID: 3615)*
+- **Email:** `86188d@pulsenet.ai` *(Donor ID: 2304)*
+- **Email:** `0e2c80@pulsenet.ai` *(Donor ID: 2344)*
+- **Email:** `206ce1@pulsenet.ai` *(Donor ID: 2363)*
+- **Email:** `782ef4@pulsenet.ai` *(Donor ID: 2557)*
+- **Password (for all donors):** `Demo123!`
+
+---
+
+## ✨ Key Features
+
+- **🧠 AI-Driven Donor Ranking:** Uses SageMaker & XGBoost to rank eligible donors based on historical behavior, distance, and reliability.
+- **🤖 Generative Insights:** Integrates Amazon Bedrock (Claude 4.5 Haiku) to analyze donor drop-off rates and generate actionable administrative insights.
+- **🗺️ Interactive Heatmaps:** Visualizes donor density and patient stress zones (e.g., Hyderabad region) using custom mapping interfaces.
+- **🔐 Secure Authentication:** Seamless login flow powered by AWS Cognito, with strict Role-Based Access Control (RBAC).
+- **📱 Automated Notifications:** Hooks into AWS SNS and Twilio for automated WhatsApp/SMS reminders.
+
+---
+
+## 🏗️ Architecture
+
+```text
 ┌─────────────────────────────────────────────────────┐
 │                    AWS Cloud                        │
 │                                                     │
@@ -16,62 +68,69 @@
 │  │  (Frontend)  │───▶│  (FastAPI Backend)       │   │
 │  │  React+Vite  │    │  Port 8000               │   │
 │  └──────────────┘    └────────────┬─────────────┘   │
-│                                   │                  │
+│                                   │                 │
 │  ┌────────────┐  ┌─────────────┐  │  ┌───────────┐  │
 │  │ SageMaker  │  │  AWS RDS    │◀─┘  │  Bedrock  │  │
 │  │ XGBoost    │  │ PostgreSQL  │     │  Claude   │  │
-│  │  Endpoint  │  └─────────────┘     │  Haiku    │  │
+│  │  Endpoint  │  └─────────────┘     │  Haiku   │  │
 │  └────────────┘                      └───────────┘  │
 │                                                     │
-│  ┌────────────┐  ┌─────────────┐  ┌─────────────┐  │
-│  │   Cognito  │  │  SNS / SES  │  │  CloudWatch │  │
-│  │    Auth    │  │  Notifs     │  │   Logging   │  │
-│  └────────────┘  └─────────────┘  └─────────────┘  │
+│  ┌────────────┐  ┌─────────────┐  ┌─────────────┐   │
+│  │   Cognito  │  │  SNS / SES  │  │  CloudWatch │   │
+│  │    Auth    │  │  Notifs     │  │   Logging   │   │
+│  └────────────┘  └─────────────┘  └─────────────┘   │
 └─────────────────────────────────────────────────────┘
 ```
 
-## Team Branch Strategy
+## 🛠️ Tech Stack
 
-| Branch | Owner | Focus |
-|--------|-------|-------|
-| `main` | All | Baseline walking skeleton (this) |
-| `feature/donor-flow` | Teammate 1 | Donor profile management, webhooks, re-engagement |
-| `feature/patient-flow` | Teammate 2 | Patient intake, transfusion calendar, Bridge mapping |
-| `feature/admin-ai` | Teammate 3 | Coordinator dashboard, XGBoost model integration, Bedrock AI |
+| Layer | Technology |
+|-------|------------|
+| **Frontend** | React 18 + Vite + TypeScript + Tailwind CSS |
+| **Backend** | FastAPI + Python 3.11 (async) |
+| **ORM** | SQLAlchemy 2.0 (async) + Pydantic v2 |
+| **Database** | AWS RDS (PostgreSQL 15) |
+| **ML Matching** | XGBoost + SageMaker Endpoint |
+| **AI Insights** | Amazon Bedrock (Claude Haiku) |
+| **Auth** | AWS Cognito |
+| **Notifications** | AWS SNS + SES + Twilio WhatsApp |
+| **Deploy** | AWS App Runner + ECR |
+| **Monitoring** | AWS CloudWatch |
 
 ---
 
-## Quick Start (Local)
+## 💻 Local Development Setup
 
 ### Prerequisites
 - Docker Desktop
 - Node.js 20+
 - Python 3.11+
-- AWS CLI (configured with hackathon credentials)
+- AWS CLI (configured)
 
-### 1. Set up environment
+### 1. Environment Configuration
 ```bash
-cd pulsenet
+git clone https://github.com/rishitsura/PulseNet.git
+cd PulseNet
 cp .env.example .env
-# Edit .env — add your AWS RDS DATABASE_URL from the hackathon portal
+# Edit .env with your AWS RDS DATABASE_URL and AWS credentials
 ```
 
 ### 2. Run with Docker Compose
+The easiest way to get the entire stack running locally:
 ```bash
 docker compose up --build
 ```
+- **Frontend:** http://localhost:5173
+- **Backend API:** http://localhost:8000
+- **Swagger Docs:** http://localhost:8000/api/docs
 
-| Service | URL |
-|---------|-----|
-| Frontend (Vite) | http://localhost:5173 |
-| Backend (FastAPI) | http://localhost:8000 |
-| API Docs | http://localhost:8000/api/docs |
-
-### 3. Or run services individually
+### 3. Run Services Individually
 
 **Backend:**
 ```bash
 cd backend
+python -m venv venv
+source venv/bin/activate  # (or venv\Scripts\activate on Windows)
 pip install -r requirements.txt
 uvicorn main:app --reload --port 8000
 ```
@@ -80,104 +139,24 @@ uvicorn main:app --reload --port 8000
 ```bash
 cd frontend
 npm install
-npm run dev     # → http://localhost:5173
+npm run dev
 ```
 
 ---
 
-## API Endpoints
+## 🔌 Core API Endpoints
 
-### Health
-```
-GET /api/health           → { status: "ok", service: "pulsenet-backend" }
-```
+### Authentication & Users
+- `POST /api/auth/login` - Authenticate via Cognito & generate JWT
+- `GET /api/donor/{id}` - Fetch donor profile (RBAC protected)
 
-### Donor
-```
-GET  /api/donor/                    → List eligible donors
-GET  /api/donor/{id}                → Get donor profile
-PUT  /api/donor/{id}                → Update profile
-POST /api/donor/webhook/availability → Availability confirmation webhook
-```
+### Admin & Care Coordination
+- `GET /api/admin/bridge/mock` - ML-ranked donor list via XGBoost
+- `GET /api/admin/ai-insights` - Generate admin insights via Amazon Bedrock
+- `POST /api/admin/notify/{donor_id}/whatsapp` - Trigger Twilio WhatsApp reminders
 
-### Patient
-```
-POST /api/patient/register          → Register new patient
-GET  /api/patient/{id}              → Get profile
-POST /api/patient/{id}/transfusion  → Log completed transfusion
-GET  /api/patient/{id}/schedule     → Upcoming transfusion dates
-```
-
-### Admin / AI
-```
-GET /api/admin/stats                → Dashboard statistics
-GET /api/admin/bridge/mock          → 🤖 ML-ranked donor list (E2E demo)
-GET /api/admin/bridges              → All active bridges
-GET /api/admin/donors/inactive      → Re-engagement targets
-```
+### Background Utilities
+- `backend/sync_cognito.py` - Script used to dynamically bulk-migrate existing RDS users directly into AWS Cognito User Pools.
 
 ---
-
-## AWS Deployment
-
-```bash
-# Make deploy script executable
-chmod +x aws/deploy.sh
-
-# Deploy to development
-./aws/deploy.sh dev
-
-# Deploy to production
-./aws/deploy.sh production
-```
-
-### Plugging in the XGBoost Model
-1. Train your model and export it: `joblib.dump(model, 'xgboost_model.pkl')`
-2. Drop `xgboost_model.pkl` into `backend/services/`
-3. The `rank_donors()` function auto-detects and uses it — no code changes needed
-4. For SageMaker endpoint, update `SAGEMAKER_ENDPOINT_NAME` in `.env`
-
-### Plugging in Amazon Bedrock
-Add to `backend/services/bedrock.py` using the pattern:
-```python
-import boto3
-bedrock = boto3.client('bedrock-runtime', region_name='us-east-1')
-response = bedrock.invoke_model(modelId='anthropic.claude-3-haiku-20240307-v1:0', ...)
-```
-
----
-
-## Dataset → Schema Mapping
-
-| Dataset Column | DB Column | Model |
-|----------------|-----------|-------|
-| `user_id` | `external_id` | User |
-| `blood_group` | `blood_group` | User |
-| `eligibility_status` | `eligibility_status` | User |
-| `calls_to_donations_ratio` | `calls_to_donations_ratio` | User |
-| `expected_next_transfusion_date` | `expected_next_transfusion_date` | Bridge |
-| `bridge_id` | `external_bridge_id` | Bridge |
-| `donated_earlier` | `donated_earlier` | BridgeMember |
-| `user_donation_active_status` | `user_donation_active_status` | User |
-| `inactive_trigger_comment` | `inactive_trigger_comment` | User |
-
----
-
-## Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React 18 + Vite + TypeScript + Tailwind CSS |
-| Backend | FastAPI + Python 3.11 (async) |
-| ORM | SQLAlchemy 2.0 (async) + Pydantic v2 |
-| Database | AWS RDS (PostgreSQL 15) |
-| ML | XGBoost + SageMaker |
-| AI | Amazon Bedrock (Claude Haiku) |
-| Auth | AWS Cognito |
-| Notifications | AWS SNS + SES |
-| Deploy | AWS App Runner + ECR |
-| Monitoring | AWS CloudWatch |
-| Container | Docker + Nginx |
-# pulsenet
-# pulsenet
-# pulseconnect
+*Built with ❤️ for the AI FOR GOOD 2.0 Hackathon.*
