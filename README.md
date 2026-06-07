@@ -54,6 +54,9 @@ We have pre-synced various user personas via AWS Cognito. Use the following cred
 - **🗺️ Interactive Heatmaps:** Visualizes donor density and patient stress zones (e.g., Hyderabad region) using custom mapping interfaces.
 - **🔐 Secure Authentication:** Seamless login flow powered by AWS Cognito, with strict Role-Based Access Control (RBAC).
 - **📱 Automated Notifications:** Hooks into AWS SNS and Twilio for automated WhatsApp/SMS reminders.
+- **🧠 ML Models**
+PulseNet uses two ML models: one predicts donor activity, and the other predicts donation eligibility.  
+These predictions power the ML-ranked donor lists and eligibility filtering in the coordinator dashboard.
 
 ---
 
